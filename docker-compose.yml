@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend           # Refers to the frontend directory
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend                 # Ensures backend is started before frontend
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:5000
+
+  backend:
+    build: ./backend            # Refers to the backend directory
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres                # Ensures PostgreSQL starts before backend
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=mydatabase
+      - DB_USER=user
+      - DB_PASSWORD=password
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
