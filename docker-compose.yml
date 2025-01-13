@@ -1,48 +1,44 @@
-version: '3.8'
+services:  # The 'version' attribute has been removed
 
-services:
   # Frontend ReactJS application
   frontend:
-    build:
-      context: ./frontend/src           # Corrected to frontend/src
-      dockerfile: Dockerfile            # Specify Dockerfile inside frontend/src
+    build: ./frontend
     ports:
-      - "3000:3000"                     # Expose React app on port 3000
+      - "3000:3000"
     depends_on:
-      - backend                         # Ensure backend is started before frontend
+      - backend
     environment:
-      - REACT_APP_BACKEND_URL=http://backend:5000  # Backend API URL
-    image: jefrey0/hello-world-frontend:latest  # Docker Hub username replaced
+      - REACT_APP_BACKEND_URL=http://backend:5000
+    image: jefrey0/hello-world-frontend:latest
 
   # Backend Flask application
   backend:
-    build: ./backend                    # Build from backend directory
+    build: ./backend
     ports:
-      - "5000:5000"                     # Expose Flask app on port 5000
+      - "5000:5000"
     depends_on:
-      - postgres                        # Ensure PostgreSQL is started before backend
+      - postgres
     environment:
-      - DB_HOST=postgres                # Database hostname
-      - DB_NAME=mydatabase              # Database name
-      - DB_USER=user                    # DB user
-      - DB_PASSWORD=password            # DB password
+      - DB_HOST=postgres
+      - DB_NAME=mydatabase
+      - DB_USER=user
+      - DB_PASSWORD=password
     volumes:
-      - ./backend:/app                  # Mount backend code to container for live changes
-    image: jefrey0/hello-world-backend:latest  # Docker Hub username replaced
+      - ./backend:/app
+    image: jefrey0/hello-world-backend:latest
 
   # PostgreSQL Database
   postgres:
-    image: postgres:13                  # Use the official PostgreSQL 13 image
+    image: postgres:13
     environment:
-      POSTGRES_USER: user               # DB user
-      POSTGRES_PASSWORD: password       # DB password
-      POSTGRES_DB: mydatabase           # Database name
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
     ports:
-      - "5432:5432"                     # Expose PostgreSQL on port 5432
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persistent volume for data storage
+      - postgres_data:/var/lib/postgresql/data
 
-# Named volume to persist PostgreSQL data across container restarts
 volumes:
   postgres_data:
     driver: local
