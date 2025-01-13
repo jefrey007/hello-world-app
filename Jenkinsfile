@@ -1,11 +1,11 @@
 pipeline {
-    agent any  // Run on any available agent
+    agent any  // Use any available agent for this pipeline
 
     environment {
         FRONTEND_IMAGE = "jefrey0/hello-world-frontend:latest"
         BACKEND_IMAGE = "jefrey0/hello-world-backend:latest"
         DOCKER_REGISTRY = "docker.io"  // Docker Hub
-        DOCKER_CREDENTIALS = "dockerhub_id"  
+        DOCKER_CREDENTIALS = "dockerhub_id"  // Replace with your DockerHub credentials ID
     }
 
     stages {
@@ -20,19 +20,19 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    // Build Docker images for frontend and backend
+                    // Build Docker images for frontend and backend using Docker Compose
                     sh 'docker-compose build --no-cache'
                 }
             }
         }
 
-        // Stage 3: Run tests (Example, assuming you have test scripts)
+        // Stage 3: Run tests (assuming you have test scripts for both backend and frontend)
         stage('Run Tests') {
             steps {
                 script {
-                    // Run backend tests with pytest
+                    // Run backend tests using pytest (or your backend test tool)
                     sh 'docker-compose run backend pytest tests/'
-                    // Run frontend tests with npm
+                    // Run frontend tests (e.g., using npm or yarn)
                     sh 'docker-compose run frontend npm run test'
                 }
             }
@@ -51,13 +51,16 @@ pipeline {
             }
         }
 
-        // Stage 5: Deploy to AWS EC2 using Docker Compose (example)
-        stage('Deploy to AWS EC2') {
+        // Stage 5: Deploy to the same EC2 instance using Docker Compose
+        stage('Deploy to EC2') {
             steps {
                 script {
-                    // SSH into AWS EC2 and deploy using Docker Compose
+                    // No SSH needed since we're deploying to the same EC2 instance where Jenkins is running.
+                    // Docker Compose will deploy the containers on this same instance.
+
                     sh """
-                    ssh -i /var/lib/jenkins/.ssh/private-key.pem ec2-user@your-ec2-ip 'cd /path/to/app && docker-compose pull && docker-compose up -d'
+                        # Pull the latest images and deploy the containers
+                        cd /path/to/your/docker-compose/directory && docker-compose pull && docker-compose up -d
                     """
                 }
             }
@@ -65,9 +68,8 @@ pipeline {
     }
 
     post {
-        // Always run this after the pipeline execution (e.g., cleanup)
         always {
-            cleanWs() // Clean up workspace
+            cleanWs() // Clean up workspace after the pipeline is finished
         }
     }
 }
