@@ -1,37 +1,46 @@
 version: '3.8'
 
 services:
+  # Frontend ReactJS application
   frontend:
-    build: ./frontend           # Refers to the frontend directory
+    build: ./frontend               # Build from frontend directory
     ports:
-      - "3000:3000"
+      - "3000:3000"                 # Expose React app on port 3000
     depends_on:
-      - backend                 # Ensures backend is started before frontend
+      - backend                     # Ensure backend is started before frontend
     environment:
-      - REACT_APP_BACKEND_URL=http://backend:5000
+      - REACT_APP_BACKEND_URL=http://backend:5000  # Backend API URL
+    image: jefrey0/hello-world-frontend:latest   # Docker Hub username replaced
 
+  # Backend Flask application
   backend:
-    build: ./backend            # Refers to the backend directory
+    build: ./backend                # Build from backend directory
     ports:
-      - "5000:5000"
+      - "5000:5000"                 # Expose Flask app on port 5000
     depends_on:
-      - postgres                # Ensures PostgreSQL starts before backend
+      - postgres                    # Ensure PostgreSQL is started before backend
     environment:
       - DB_HOST=postgres
       - DB_NAME=mydatabase
       - DB_USER=user
       - DB_PASSWORD=password
-
-  postgres:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydatabase
-    ports:
-      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./backend:/app              # Mount backend code to container for live changes
+    image: jefrey0/hello-world-backend:latest  # Docker Hub username replaced
 
+  # PostgreSQL Database
+  postgres:
+    image: postgres:13              # Use the official PostgreSQL 13 image
+    environment:
+      POSTGRES_USER: user           # DB user
+      POSTGRES_PASSWORD: password   # DB password
+      POSTGRES_DB: mydatabase       # Database name
+    ports:
+      - "5432:5432"                 # Expose PostgreSQL on port 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistent volume for data storage
+
+# Named volume to persist PostgreSQL data across container restarts
 volumes:
   postgres_data:
+    driver: local
