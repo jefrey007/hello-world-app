@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/frontend"      # Path to your frontend directory
+    schedule:
+      interval: "daily"        # Check for updates weekly
