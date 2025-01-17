@@ -1,8 +1,12 @@
 from flask import Flask
+from flask_cors import CORS  # Import flask_cors to handle CORS
 import psycopg2
 import os
 
 app = Flask(__name__)
+
+# Enable CORS for all routes (you can specify more granular rules if needed)
+CORS(app)
 
 def get_db_connection():
     connection = psycopg2.connect(
