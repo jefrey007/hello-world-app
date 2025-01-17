@@ -18,6 +18,11 @@ services:
       - hello-world-net
     depends_on:
       - postgres
+    environment:
+      - DB_HOST=postgres       # Set the DB_HOST to the service name 'postgres'
+      - DB_NAME=mydatabase     # Set the DB_NAME
+      - DB_USER=user           # Set the DB_USER
+      - DB_PASSWORD=password   # Set the DB_PASSWORD
 
   postgres:
     image: postgres:13
