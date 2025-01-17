@@ -2,27 +2,31 @@ version: '3'
 
 services:
   frontend:
-    build:
-      context: ./frontend
+    build: ./frontend
     ports:
       - "3000:3000"
+    depends_on:
+      - backend
+    image: jefrey0/hello-world-frontend:latest
     networks:
       - hello-world-net
 
   backend:
-    build:
-      context: ./backend
+    build: ./backend
     ports:
       - "5000:5000"
-    networks:
-      - hello-world-net
     depends_on:
       - postgres
     environment:
-      - DB_HOST=postgres       # Set the DB_HOST to the service name 'postgres'
-      - DB_NAME=mydatabase     # Set the DB_NAME
-      - DB_USER=user           # Set the DB_USER
-      - DB_PASSWORD=password   # Set the DB_PASSWORD
+      - DB_HOST=postgres
+      - DB_NAME=mydatabase
+      - DB_USER=user
+      - DB_PASSWORD=password
+    volumes:
+      - ./backend:/app
+    image: jefrey0/hello-world-backend:latest
+    networks:
+      - hello-world-net
 
   postgres:
     image: postgres:13
@@ -31,7 +35,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:
-      - "5433:5432"  # Changed host port to 5433
+      - "5433:5432"  # Bind PostgreSQL to host port 5433
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
