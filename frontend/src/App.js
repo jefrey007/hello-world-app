@@ -4,7 +4,7 @@ function App() {
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
-    fetch('http://backend:5000')  
+    fetch('http://35.154.252.53:5000')  
       .then(response => response.text())
       .then(data => setGreeting(data))
       .catch(err => console.error('Error fetching greeting:', err));
