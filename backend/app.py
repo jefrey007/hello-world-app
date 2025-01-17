@@ -9,7 +9,7 @@ CORS(app)  # Enabling CORS for all routes by default
 
 def get_db_connection():
     connection = psycopg2.connect(
-        host=os.getenv('DB_HOST', 'localhost'),
+        host=os.getenv('DB_HOST', 'postgres'),  # Update default to 'postgres'
         database=os.getenv('DB_NAME', 'mydatabase'),
         user=os.getenv('DB_USER', 'user'),
         password=os.getenv('DB_PASSWORD', 'password')
