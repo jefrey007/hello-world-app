@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
 
   # Frontend ReactJS application
@@ -8,7 +10,7 @@ services:
     depends_on:
       - backend
     environment:
-      - REACT_APP_BACKEND_URL=http://backend:5000
+      - REACT_APP_BACKEND_URL=http://backend:5000  # Ensure this is used in your React code to connect to the backend
     image: jefrey0/hello-world-frontend:latest
 
   # Backend Flask application
@@ -38,7 +40,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql  # Add this line to execute the SQL script
+      - ./backend/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql  # Added to run the SQL initialization script
 
 volumes:
   postgres_data:
