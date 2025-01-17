@@ -4,6 +4,9 @@ FROM python:3.9-alpine
 # Install PostgreSQL development libraries to resolve pg_config issue
 RUN apk update && apk add --no-cache postgresql-dev
 
+# Install flask-cors to handle CORS issues
+RUN pip install flask-cors
+
 # Set the working directory
 WORKDIR /app
 
