@@ -1,4 +1,4 @@
-services:  # The 'version' attribute has been removed
+services:
 
   # Frontend ReactJS application
   frontend:
@@ -38,6 +38,7 @@ services:  # The 'version' attribute has been removed
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql  # Add this line to execute the SQL script
 
 volumes:
   postgres_data:
