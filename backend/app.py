@@ -1,31 +1,47 @@
-from flask import Flask
-from flask_cors import CORS  # Import flask_cors to handle CORS
-import psycopg2
-import os
+version: "3.8"
 
-app = Flask(__name__)
+services:
 
-# Enable CORS for all routes (you can specify more granular rules if needed)
-CORS(app)
+  # Frontend ReactJS application
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:5000  
+    image: jefrey0/hello-world-frontend:latest
 
-def get_db_connection():
-    connection = psycopg2.connect(
-        host=os.getenv('DB_HOST', 'localhost'),
-        database=os.getenv('DB_NAME', 'mydatabase'),
-        user=os.getenv('DB_USER', 'user'),
-        password=os.getenv('DB_PASSWORD', 'password')
-    )
-    return connection
+  # Backend Flask application
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=mydatabase
+      - DB_USER=user
+      - DB_PASSWORD=password
+    volumes:
+      - ./backend:/app
+    image: jefrey0/hello-world-backend:latest
 
-@app.route('/')
-def hello():
-    connection = get_db_connection()
-    cursor = connection.cursor()
-    cursor.execute('SELECT message FROM greetings LIMIT 1;')
-    greeting = cursor.fetchone()[0]
-    cursor.close()
-    connection.close()
-    return greeting
+  # PostgreSQL Database
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5434:5432"  # Changed to 5434
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql  # Added to run the SQL initialization script
 
-if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+volumes:
+  postgres_data:
+    driver: local
