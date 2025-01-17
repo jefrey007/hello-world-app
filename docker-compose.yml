@@ -1,47 +1,41 @@
-version: "3.8"
+version: '3'
 
 services:
-
-  # Frontend ReactJS application
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
     ports:
       - "3000:3000"
-    depends_on:
-      - backend
-    environment:
-      - REACT_APP_BACKEND_URL=http://backend:5000  # Ensure this is used in your React code to connect to the backend
-    image: jefrey0/hello-world-frontend:latest
+    networks:
+      - hello-world-net
 
-  # Backend Flask application
   backend:
-    build: ./backend
+    build:
+      context: ./backend
     ports:
       - "5000:5000"
+    networks:
+      - hello-world-net
     depends_on:
       - postgres
-    environment:
-      - DB_HOST=postgres
-      - DB_NAME=mydatabase
-      - DB_USER=user
-      - DB_PASSWORD=password
-    volumes:
-      - ./backend:/app
-    image: jefrey0/hello-world-backend:latest
 
-  # PostgreSQL Database
   postgres:
     image: postgres:13
     environment:
+      POSTGRES_DB: mydatabase
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydatabase
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Changed host port to 5433
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql  # Added to run the SQL initialization script
+    networks:
+      - hello-world-net
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  hello-world-net:
+    driver: bridge
