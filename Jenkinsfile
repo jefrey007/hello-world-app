@@ -103,14 +103,14 @@ vW+kmEZ0QRElucMqTtPDUoMdlnEbcqXl7r6H6s5i6XSPrf3OJtU=
                 script {
                     sh '''
                     echo "$SSH_PRIVATE_KEY" > /tmp/aws-key.pem
-                    sudo chmod 400 /tmp/aws-key.pem
+                    chmod 400 /tmp/aws-key.pem
                     ssh -o StrictHostKeyChecking=no -i /tmp/aws-key.pem ec2-user@35.154.252.53 << 'EOF'
                     cd ~/hello-world-app
                     docker-compose down
                     docker-compose pull
                     docker-compose up -d
                     EOF
-                    sudo rm -f /tmp/aws-key.pem
+                    rm -f /tmp/aws-key.pem
                     '''
                 }
             }
