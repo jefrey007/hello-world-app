@@ -8,7 +8,7 @@ pipeline {
         FLASK_IMAGE = 'jefrey0/flask-app'
         REACT_TAG = 'latest'
         FLASK_TAG = 'latest'
-        
+
         SSH_PRIVATE_KEY = '''-----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEAoq076wDRvbbWmvNnRUXYZi2CABVQee8QdrcHwJE6SApL/0Sv
 mahZKYxTIfCGO5VjE0SsRGgwNkbR3+P01gu6TIXUEvUtcrkFQxwWT7rGjs163kjq
@@ -103,13 +103,14 @@ vW+kmEZ0QRElucMqTtPDUoMdlnEbcqXl7r6H6s5i6XSPrf3OJtU=
                 script {
                     sh '''
                     echo "$SSH_PRIVATE_KEY" > /tmp/aws-key.pem
-                    chmod 600 /tmp/aws-key.pem
+                    sudo chmod 400 /tmp/aws-key.pem
                     ssh -o StrictHostKeyChecking=no -i /tmp/aws-key.pem ec2-user@35.154.252.53 << 'EOF'
+                    cd ~/hello-world-app
                     docker-compose down
                     docker-compose pull
                     docker-compose up -d
                     EOF
-                    rm -f /tmp/aws-key.pem
+                    sudo rm -f /tmp/aws-key.pem
                     '''
                 }
             }
