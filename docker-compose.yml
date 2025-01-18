@@ -10,8 +10,7 @@ services:
     depends_on:
       - backend
     environment:
-      - REACT_APP_BACKEND_URL=http://backend:5000  
-    image: jefrey0/hello-world-frontend:latest
+      - REACT_APP_BACKEND_URL=http://backend:5000    
 
   # Backend Flask application
   backend:
@@ -40,7 +39,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql  # Added to run the SQL initialization script
+      - ./backend/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql 
 
 volumes:
   postgres_data:
