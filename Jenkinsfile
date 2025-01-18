@@ -5,7 +5,7 @@ pipeline {
         FRONTEND_IMAGE = "jefrey0/hello-world-frontend:latest"
         BACKEND_IMAGE = "jefrey0/hello-world-backend:latest"
         DOCKER_REGISTRY = "docker.io"
-        DOCKER_CREDENTIALS = "dockerhub_id" // Replace with your DockerHub credentials ID
+        DOCKER_CREDENTIALS = "dockerhub_id"
     }
 
     stages {
