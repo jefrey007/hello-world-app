@@ -26,7 +26,6 @@ services:
       - DB_PASSWORD=password
     volumes:
       - ./backend:/app
-    image: jefrey0/hello-world-backend:latest
 
   # PostgreSQL Database
   postgres:
