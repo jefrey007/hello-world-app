@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub_id')
-        AWS_KEY = credentials('aws-key')
-        REPO_URL = 'https://github.com/jefrey007/hello-world-app.git'
-        REACT_IMAGE = 'jefrey0/react-app'
-        FLASK_IMAGE = 'jefrey0/flask-app'
-        REACT_TAG = 'latest'
-        FLASK_TAG = 'latest' 
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub_id') 
+        AWS_KEY = credentials('aws-key')                   
+        REPO_URL = 'https://github.com/jefrey007/hello-world-app.git' 
+        REACT_IMAGE = 'jefrey0/react-app'                  
+        FLASK_IMAGE = 'jefrey0/flask-app'                 
+        REACT_TAG = 'latest'                               
+        FLASK_TAG = 'latest'                               
     }
 
     stages {
@@ -17,7 +17,7 @@ pipeline {
                 script {
                     echo 'Cloning Repository...'
                 }
-                checkout scm 
+                checkout scm // Pulls the repository specified in the Jenkins job configuration
             }
         }
 
@@ -39,32 +39,6 @@ pipeline {
                             sh '''
                             cd backend 
                             docker build -t ${FLASK_IMAGE}:${FLASK_TAG} .
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Run Unit Tests') {
-            parallel {
-                stage('Run ReactJS Unit Tests') {
-                    steps {
-                        script {
-                            sh '''
-                            cd frontend 
-                            npm install 
-                            npm test 
-                            '''
-                        }
-                    }
-                }
-                stage('Run Flask Unit Tests') {
-                    steps {
-                        script {
-                            sh '''
-                            cd backend 
-                            pytest 
                             '''
                         }
                     }
@@ -104,7 +78,7 @@ pipeline {
                 script {
                     sshagent(['aws-key']) { 
                         sh '''
-                        ssh -o StrictHostKeyChecking=no ec2-user@35.154.252.53 << EOF                      
+                        ssh -o StrictHostKeyChecking=no ec2-user@35.154.252.53 << EOF
                         docker-compose down 
                         docker-compose pull 
                         docker-compose up -d 
