@@ -2,13 +2,12 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub_id') 
-        AWS_KEY = credentials('aws-key')                   
-        REPO_URL = 'https://github.com/jefrey007/hello-world-app.git' 
-        REACT_IMAGE = 'jefrey0/react-app'                  
-        FLASK_IMAGE = 'jefrey0/flask-app'                 
-        REACT_TAG = 'latest'                               
-        FLASK_TAG = 'latest'                               
+        DOCKER_USERNAME = 'jefrey0'                  
+        DOCKER_PASSWORD = 'dckr_pat_GGrPK8NZV8xY_x8o7nkqLLReYNE'
+        REACT_IMAGE = 'jefrey0/react-app'           
+        FLASK_IMAGE = 'jefrey0/flask-app'           
+        REACT_TAG = 'latest'                      
+        FLASK_TAG = 'latest'                       
     }
 
     stages {
@@ -17,7 +16,7 @@ pipeline {
                 script {
                     echo 'Cloning Repository...'
                 }
-                checkout scm // Pulls the repository specified in the Jenkins job configuration
+                checkout scm
             }
         }
 
@@ -27,7 +26,7 @@ pipeline {
                     steps {
                         script {
                             sh '''
-                            cd frontend 
+                            cd frontend
                             docker build -t ${REACT_IMAGE}:${REACT_TAG} .
                             '''
                         }
@@ -37,7 +36,7 @@ pipeline {
                     steps {
                         script {
                             sh '''
-                            cd backend 
+                            cd backend
                             docker build -t ${FLASK_IMAGE}:${FLASK_TAG} .
                             '''
                         }
@@ -51,22 +50,20 @@ pipeline {
                 stage('Push ReactJS Image') {
                     steps {
                         script {
-                            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
-                                sh '''
-                                docker push ${REACT_IMAGE}:${REACT_TAG} 
-                                '''
-                            }
+                            sh '''
+                            docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                            docker push ${REACT_IMAGE}:${REACT_TAG}
+                            '''
                         }
                     }
                 }
                 stage('Push Flask Image') {
                     steps {
                         script {
-                            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
-                                sh '''
-                                docker push ${FLASK_IMAGE}:${FLASK_TAG}
-                                '''
-                            }
+                            sh '''
+                            docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                            docker push ${FLASK_IMAGE}:${FLASK_TAG}
+                            '''
                         }
                     }
                 }
@@ -76,12 +73,12 @@ pipeline {
         stage('Deploy to AWS') {
             steps {
                 script {
-                    sshagent(['aws-key']) { 
+                    sshagent(['aws-key']) {
                         sh '''
                         ssh -o StrictHostKeyChecking=no ec2-user@35.154.252.53 << EOF
-                        docker-compose down 
-                        docker-compose pull 
-                        docker-compose up -d 
+                        docker-compose down
+                        docker-compose pull
+                        docker-compose up -d
                         EOF
                         '''
                     }
