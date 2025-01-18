@@ -2,62 +2,126 @@ pipeline {
     agent any
 
     environment {
-        FRONTEND_IMAGE = "jefrey0/hello-world-frontend:latest"
-        BACKEND_IMAGE = "jefrey0/hello-world-backend:latest"
-        DOCKER_REGISTRY = "docker.io"
-        DOCKER_CREDENTIALS = "dockerhub_id"
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub_id')
+        AWS_KEY = credentials('aws-key')
+        REPO_URL = 'https://github.com/jefrey007/hello-world-app.git'
+        REACT_IMAGE = 'jefrey0/react-app'
+        FLASK_IMAGE = 'jefrey0/flask-app'
+        REACT_TAG = 'latest'
+        FLASK_TAG = 'latest' 
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                checkout scm
+                script {
+                    echo 'Cloning Repository...'
+                }
+                checkout scm 
             }
         }
 
         stage('Build Docker Images') {
-            steps {
-                script {
-                    sh 'docker-compose build --no-cache'
+            parallel {
+                stage('Build ReactJS Image') {
+                    steps {
+                        script {
+                            sh '''
+                            cd frontend 
+                            docker build -t ${REACT_IMAGE}:${REACT_TAG} .
+                            '''
+                        }
+                    }
                 }
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                script {
-                    sh 'docker-compose run backend pytest'
-                    sh 'docker-compose run frontend npm run test'
-                }
-            }
-        }
-
-        stage('Push Docker Images') {
-            steps {
-                script {
-                    docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS}") {
-                        sh 'docker-compose push'
+                stage('Build Flask Image') {
+                    steps {
+                        script {
+                            sh '''
+                            cd backend 
+                            docker build -t ${FLASK_IMAGE}:${FLASK_TAG} .
+                            '''
+                        }
                     }
                 }
             }
         }
 
-        stage('Deploy to EC2') {
+        stage('Run Unit Tests') {
+            parallel {
+                stage('Run ReactJS Unit Tests') {
+                    steps {
+                        script {
+                            sh '''
+                            cd frontend 
+                            npm install 
+                            npm test 
+                            '''
+                        }
+                    }
+                }
+                stage('Run Flask Unit Tests') {
+                    steps {
+                        script {
+                            sh '''
+                            cd backend 
+                            pytest 
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Tag and Push Docker Images') {
+            parallel {
+                stage('Push ReactJS Image') {
+                    steps {
+                        script {
+                            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
+                                sh '''
+                                docker push ${REACT_IMAGE}:${REACT_TAG} 
+                                '''
+                            }
+                        }
+                    }
+                }
+                stage('Push Flask Image') {
+                    steps {
+                        script {
+                            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
+                                sh '''
+                                docker push ${FLASK_IMAGE}:${FLASK_TAG}
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to AWS') {
             steps {
                 script {
-                    sh """
-                        cd ${WORKSPACE}/hello-world-app
-                        docker-compose pull
-                        docker-compose up -d
-                    """
+                    sshagent(['aws-key']) { 
+                        sh '''
+                        ssh -o StrictHostKeyChecking=no ec2-user@35.154.252.53 << EOF                      
+                        docker-compose down 
+                        docker-compose pull 
+                        docker-compose up -d 
+                        EOF
+                        '''
+                    }
                 }
             }
         }
     }
 
     post {
-        always {
-            cleanWs()
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check logs.'
         }
     }
 }
