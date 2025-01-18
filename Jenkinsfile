@@ -104,7 +104,7 @@ vW+kmEZ0QRElucMqTtPDUoMdlnEbcqXl7r6H6s5i6XSPrf3OJtU=
                     sh '''
                     echo "$SSH_PRIVATE_KEY" > /tmp/aws-key.pem
                     chmod 600 /tmp/aws-key.pem
-                    ssh -o StrictHostKeyChecking=no -i /tmp/aws-key.pem ec2-user@35.154.252.53 << EOF
+                    ssh -o StrictHostKeyChecking=no -i /tmp/aws-key.pem ec2-user@35.154.252.53 << 'EOF'
                     docker-compose down
                     docker-compose pull
                     docker-compose up -d
